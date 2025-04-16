@@ -3,53 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gewichtetes Haushaltseinkommen Rechner</title>
+  <title>Haushaltseinkommen Rechner</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      padding: 0;
-      max-width: 500px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    label {
-      display: block;
-      margin-top: 15px;
-    }
-    input[type="number"] {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      box-sizing: border-box;
-      margin-top: 5px;
-    }
-    button {
-      margin-top: 20px;
-      padding: 12px;
-      width: 100%;
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    .result {
-      margin-top: 20px;
-      font-weight: bold;
-      font-size: 18px;
-      text-align: center;
-    }
+    body { font-family: Arial, sans-serif; max-width: 500px; margin: 20px auto; }
+    label { display: block; margin-top: 15px; }
+    input[type="number"] { width: 100%; padding: 10px; font-size: 16px; box-sizing: border-box; margin-top: 5px; }
+    button { margin-top: 20px; padding: 12px; width: 100%; font-size: 16px; border-radius: 5px; cursor: pointer; }
+    .calculate { background-color: #007BFF; color: white; border: none; }
+    .calculate:hover { background-color: #0056b3; }
+    .export { background-color: #28a745; color: white; border: none; }
+    .export:hover { background-color: #1e7e34; }
+    .result { margin-top: 20px; font-weight: bold; font-size: 18px; text-align: center; }
   </style>
 </head>
 <body>
   <h2>Gewichtetes Haushaltseinkommen Rechner</h2>
 
-  <label for="adults">Anzahl der Erwachsenen (14+Jahre):</label>
+  <label for="adults">Anzahl der Erwachsenen (14+ Jahre):</label>
   <input type="number" id="adults" min="1">
 
   <label for="children">Anzahl der Kinder (unter 14 Jahren):</label>
@@ -58,26 +28,54 @@
   <label for="income">Jahreshaushaltseinkommen (€):</label>
   <input type="number" id="income" min="0" step="1000" value="50000">
 
-  <button onclick="calculateIncome()">Berechnen</button>
+  <button class="calculate" onclick="calculateIncome()">Berechnen</button>
+  <button class="export" onclick="exportData()">Daten exportieren</button>
 
   <div class="result" id="result"></div>
 
   <script>
+    const dataset = [];
+
     function calculateIncome() {
-      const adults = parseFloat(document.getElementById("adults").value);
-      const children = parseFloat(document.getElementById("children").value);
+      const adults = parseInt(document.getElementById("adults").value);
+      const children = parseInt(document.getElementById("children").value);
       const income = parseFloat(document.getElementById("income").value);
 
-      if (isNaN(adults) || adults < 1 || isNaN(income)) {
+      if (isNaN(adults) || adults < 1 || isNaN(children) || isNaN(income)) {
         document.getElementById("result").textContent = "Bitte gültige Werte eingeben.";
         return;
       }
 
       const weight = 1 + (adults - 1) * 0.5 + children * 0.3;
       const weightedIncome = income * weight / (adults + children);
+      const roundedIncome = Math.round(weightedIncome);
 
-      document.getElementById("result").textContent =
-        "Gewichtetes Haushaltseinkommen: " + Math.round(weightedIncome) + " €";
+      const resultText = `Gewichtetes Haushaltseinkommen: ${roundedIncome} €`;
+      document.getElementById("result").textContent = resultText;
+
+      dataset.push(roundedIncome);
+    }
+
+    function exportData() {
+      if (dataset.length === 0) {
+        alert("Keine Daten zum Exportieren vorhanden.");
+        return;
+      }
+
+      const csvRows = ["Gewichtetes Einkommen"];
+      dataset.forEach(income => {
+        csvRows.push(income);
+      });
+
+      const blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.setAttribute("hidden", "");
+      a.setAttribute("href", url);
+      a.setAttribute("download", "gewichtetes_einkommen.csv");
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
   </script>
 </body>
