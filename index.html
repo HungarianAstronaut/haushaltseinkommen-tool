@@ -35,6 +35,9 @@
       font-size: 1.2rem;
       font-weight: bold;
     }
+    canvas {
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
@@ -48,4 +51,43 @@
   <label for="income">Jahreshaushaltseinkommen (€):</label>
   <input type="text" id="income" value="50.000" />
 
-  <button onclick="calculateIncome()">Berechnen
+  <button onclick="calculateIncome()">Berechnen</button>
+
+  <div id="result"></div>
+  <canvas id="chart" width="400" height="300"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const incomeInput = document.getElementById("income");
+    const chartCanvas = document.getElementById("chart");
+    let chart;
+    let quartileCounts = [0, 0, 0, 0];
+
+    // Tausendertrennzeichen live formatieren
+    incomeInput.addEventListener("input", (e) => {
+      const raw = e.target.value.replace(/\D/g, "");
+      e.target.value = Number(raw).toLocaleString("de-DE");
+    });
+
+    function sendToGoogleSheet(weightedIncome) {
+      const endpoint = "https://script.google.com/macros/s/AKfycbzRWxtGey1AqVqBaCewVbITnjvM4f5Gbc2Vt3v077GjTEe5Vrcc0Xsw3G0YvO1Ar4Sd-g/exec";
+
+      fetch(endpoint, {
+        method: "POST",
+        body: JSON.stringify({
+          gewichtetesEinkommen: weightedIncome
+        }),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(res => console.log("Gesendet an Google Sheets:", weightedIncome))
+      .catch(err => console.error("Fehler beim Senden:", err));
+    }
+
+    function updateChart() {
+      if (chart) chart.destroy();
+      chart = new Chart(chartCanvas, {
+        type: "bar",
+        data: {
+          labels: ["0–24
