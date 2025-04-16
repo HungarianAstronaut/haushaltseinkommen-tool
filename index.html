@@ -26,7 +26,7 @@
   <input type="number" id="children" min="0">
 
   <label for="income">Jahreshaushaltseinkommen (€):</label>
-  <input type="number" id="income" min="0" step="1000" value="50000">
+  <input type="text" id="income" inputmode="numeric" pattern="[0-9]*" value="50.000">
 
   <button class="calculate" onclick="calculateIncome()">Berechnen</button>
   <button class="export" onclick="exportData()">Daten exportieren</button>
@@ -36,10 +36,22 @@
   <script>
     const dataset = [];
 
+    function formatNumber(num) {
+      return num.toLocaleString('de-DE');
+    }
+
+    document.getElementById("income").addEventListener("input", function(e) {
+      const value = e.target.value.replace(/\./g, "").replace(/[^0-9]/g, "");
+      if (!isNaN(value)) {
+        e.target.value = formatNumber(Number(value));
+      }
+    });
+
     function calculateIncome() {
       const adults = parseInt(document.getElementById("adults").value);
       const children = parseInt(document.getElementById("children").value);
-      const income = parseFloat(document.getElementById("income").value);
+      const incomeRaw = document.getElementById("income").value.replace(/\./g, "");
+      const income = parseFloat(incomeRaw);
 
       if (isNaN(adults) || adults < 1 || isNaN(children) || isNaN(income)) {
         document.getElementById("result").textContent = "Bitte gültige Werte eingeben.";
@@ -50,7 +62,7 @@
       const weightedIncome = income * weight / (adults + children);
       const roundedIncome = Math.round(weightedIncome);
 
-      const resultText = `Gewichtetes Haushaltseinkommen: ${roundedIncome} €`;
+      const resultText = `Dein gewichtetes Haushaltseinkommen beträgt ${formatNumber(roundedIncome)} €`;
       document.getElementById("result").textContent = resultText;
 
       dataset.push(roundedIncome);
