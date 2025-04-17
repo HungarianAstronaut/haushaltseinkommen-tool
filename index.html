@@ -2,146 +2,96 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gewichtetes Haushaltseinkommen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Haushaltseinkommen</title>
   <style>
     body {
       font-family: sans-serif;
-      padding: 2rem;
-      max-width: 600px;
+      padding: 1rem;
+      max-width: 400px;
       margin: auto;
     }
-    label, input {
+
+    label {
       display: block;
-      margin-bottom: 1rem;
-      font-size: 1.1rem;
+      margin-top: 1rem;
     }
+
     input {
-      padding: 0.5rem;
       width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin-top: 0.2rem;
       box-sizing: border-box;
     }
+
     button {
-      padding: 0.7rem 1.2rem;
+      margin-top: 1.5rem;
+      padding: 0.7rem;
       font-size: 1rem;
-      background-color: #1976d2;
+      width: 100%;
+      background-color: #007bff;
       color: white;
       border: none;
-      border-radius: 0.5rem;
+      border-radius: 6px;
       cursor: pointer;
     }
-    #result {
-      margin-top: 2rem;
-      font-size: 1.2rem;
-      font-weight: bold;
+
+    button:hover {
+      background-color: #0056b3;
     }
-    canvas {
-      margin-top: 2rem;
+
+    #ergebnis {
+      margin-top: 1.5rem;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
   <h2>Gewichtetes Haushaltseinkommen berechnen</h2>
-  <label for="adults">Anzahl der Erwachsenen (14+ Jahre):</label>
-  <input type="number" id="adults" min="1" placeholder="z. B. 2" />
 
-  <label for="children">Anzahl der Kinder (unter 14 Jahren):</label>
-  <input type="number" id="children" min="0" placeholder="z. B. 1" />
+  <label for="erwachsene">Anzahl der Erwachsenen (14+ Jahre):</label>
+  <input id="erwachsene" type="number" min="1" />
 
-  <label for="income">Jahreshaushaltseinkommen (€):</label>
-  <input type="text" id="income" value="50.000" />
+  <label for="kinder">Anzahl der Kinder (unter 14 Jahren):</label>
+  <input id="kinder" type="number" min="0" />
 
-  <button onclick="calculateIncome()">Berechnen</button>
+  <label for="einkommen">Jahreshaushaltseinkommen (€):</label>
+  <input id="einkommen" type="number" step="1000" value="50000" />
 
-  <div id="result"></div>
-  <canvas id="chart" width="400" height="300"></canvas>
+  <button onclick="berechne()">Berechnen & Senden</button>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <p id="ergebnis"></p>
+
   <script>
-    const incomeInput = document.getElementById("income");
-    const chartCanvas = document.getElementById("chart");
-    let chart;
-    let quartileCounts = [0, 0, 0, 0];
+    function berechne() {
+      const erw = parseInt(document.getElementById("erwachsene").value) || 0;
+      const kind = parseInt(document.getElementById("kinder").value) || 0;
+      const einkommen = parseFloat(document.getElementById("einkommen").value) || 0;
 
-    // Tausendertrennzeichen live formatieren
-    incomeInput.addEventListener("input", (e) => {
-      const raw = e.target.value.replace(/\D/g, "");
-      e.target.value = Number(raw).toLocaleString("de-DE");
-    });
-
-    function sendToGoogleSheet(weightedIncome) {
-      const endpoint = "https://script.google.com/macros/s/AKfycbzRWxtGey1AqVqBaCewVbITnjvM4f5Gbc2Vt3v077GjTEe5Vrcc0Xsw3G0YvO1Ar4Sd-g/exec";
-
-      fetch(endpoint, {
-        method: "POST",
-        body: JSON.stringify({
-          gewichtetesEinkommen: weightedIncome
-        }),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      })
-      .then(res => console.log("Gesendet an Google Sheets:", weightedIncome))
-      .catch(err => console.error("Fehler beim Senden:", err));
-    }
-
-    function updateChart() {
-      if (chart) chart.destroy();
-      chart = new Chart(chartCanvas, {
-        type: "bar",
-        data: {
-          labels: ["0–24.999", "25.000–49.999", "50.000–74.999", "75.000+"],
-          datasets: [{
-            label: "Anzahl der Einträge",
-            data: quartileCounts,
-            backgroundColor: "#1976d2"
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false },
-            title: {
-              display: true,
-              text: "Verteilung nach gewichtetem Einkommen (Quartile)"
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              precision: 0
-            }
-          }
-        }
-      });
-    }
-
-    function calculateIncome() {
-      const adults = parseInt(document.getElementById("adults").value);
-      const children = parseInt(document.getElementById("children").value);
-      const incomeRaw = document.getElementById("income").value.replace(/\./g, "");
-      const income = parseFloat(incomeRaw);
-
-      if (isNaN(adults) || adults < 1 || isNaN(children) || isNaN(income)) {
-        document.getElementById("result").textContent = "Bitte gültige Werte eingeben.";
+      if (erw === 0) {
+        alert("Bitte mindestens eine erwachsene Person angeben.");
         return;
       }
 
-      const weight = 1 + (adults - 1) * 0.5 + children * 0.3;
-      const weightedIncome = Math.round(income * weight / (adults + children));
+      const gewicht = 1 + (erw - 1) * 0.5 + kind * 0.3;
+      const gewichtetesEinkommen = Math.round(einkommen / gewicht);
 
-      // Ergebnis anzeigen
-      document.getElementById("result").textContent =
-        `Dein gewichtetes Haushaltseinkommen beträgt ${weightedIncome.toLocaleString("de-DE")} €`;
+      document.getElementById("ergebnis").textContent =
+        "Dein gewichtetes Haushaltseinkommen beträgt: " +
+        gewichtetesEinkommen.toLocaleString("de-DE") + " €";
 
-      // Zählen in Quartil
-      if (weightedIncome < 25000) quartileCounts[0]++;
-      else if (weightedIncome < 50000) quartileCounts[1]++;
-      else if (weightedIncome < 75000) quartileCounts[2]++;
-      else quartileCounts[3]++;
-
-      updateChart();
-      sendToGoogleSheet(weightedIncome);
+      // Senden an Google Apps Script Web-App
+      fetch("https://script.google.com/macros/s/AKfycbwf3cx4AGkjrPLkVO_ZQDNM_vrbUNixZP6ZCDzXiihnnJSUyTNL_j2mCqgE6c7WKXheLQ/exec", {
+        method: "POST",
+        body: JSON.stringify({ gewichtetesEinkommen }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then(response => response.text())
+      .then(result => console.log("Erfolgreich gesendet:", result))
+      .catch(error => console.error("Fehler beim Senden:", error));
     }
   </script>
 </body>
