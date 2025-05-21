@@ -1,98 +1,31 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Haushaltseinkommen</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 1rem;
-      max-width: 400px;
-      margin: auto;
+<script>
+  function berechne() {
+    const erw = parseInt(document.getElementById("erwachsene").value) || 0;
+    const kind = parseInt(document.getElementById("kinder").value) || 0;
+    const einkommen = parseFloat(document.getElementById("einkommen").value) || 0;
+
+    if (erw === 0) {
+      alert("Bitte mindestens eine erwachsene Person angeben.");
+      return;
     }
 
-    label {
-      display: block;
-      margin-top: 1rem;
-    }
+    const gewicht = 1 + (erw - 1) * 0.5 + kind * 0.3;
+    const gewichtetesEinkommen = Math.round((einkommen * 1.8) / gewicht);
 
-    input {
-      width: 100%;
-      padding: 0.5rem;
-      font-size: 1rem;
-      margin-top: 0.2rem;
-      box-sizing: border-box;
-    }
+    document.getElementById("ergebnis").textContent =
+      "Dein gewichtetes Haushaltseinkommen beträgt: " +
+      gewichtetesEinkommen.toLocaleString("de-DE") + " €";
 
-    button {
-      margin-top: 1.5rem;
-      padding: 0.7rem;
-      font-size: 1rem;
-      width: 100%;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    #ergebnis {
-      margin-top: 1.5rem;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-  <h2>Gewichtetes Haushaltseinkommen berechnen</h2>
-
-  <label for="erwachsene">Anzahl der Erwachsenen (14+ Jahre):</label>
-  <input id="erwachsene" type="number" min="1" />
-
-  <label for="kinder">Anzahl der Kinder (unter 14 Jahren):</label>
-  <input id="kinder" type="number" min="0" />
-
-  <label for="einkommen">Jahreshaushaltseinkommen (€):</label>
-  <input id="einkommen" type="number" step="1000" value="50000" />
-
-  <button onclick="berechne()">Berechnen & Senden</button>
-
-  <p id="ergebnis"></p>
-
-  <script>
-    function berechne() {
-      const erw = parseInt(document.getElementById("erwachsene").value) || 0;
-      const kind = parseInt(document.getElementById("kinder").value) || 0;
-      const einkommen = parseFloat(document.getElementById("einkommen").value) || 0;
-
-      if (erw === 0) {
-        alert("Bitte mindestens eine erwachsene Person angeben.");
-        return;
-      }
-
-      const gewicht = 1 + (erw - 1) * 0.5 + kind * 0.3;
-      const gewichtetesEinkommen = Math.round(einkommen / gewicht);
-
-      document.getElementById("ergebnis").textContent =
-        "Dein gewichtetes Haushaltseinkommen beträgt: " +
-        gewichtetesEinkommen.toLocaleString("de-DE") + " €";
-
-      // Senden an Google Apps Script Web-App
-      fetch("https://script.google.com/macros/s/AKfycbyS7-E003fefy7Umu2NbPYokj1PUKcsmOWrdfmI-YHGsPuJN2mFFvMTzKEx7RqYYZbl4g/exec", {
-        method: "POST",
-        body: JSON.stringify({ gewichtetesEinkommen }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-      .then(response => response.text())
-      .then(result => console.log("Erfolgreich gesendet:", result))
-      .catch(error => console.error("Fehler beim Senden:", error));
-    }
-  </script>
-</body>
-</html>
+    // Senden an Google Apps Script Web-App
+    fetch("https://script.google.com/macros/s/AKfycbyS7-E003fefy7Umu2NbPYokj1PUKcsmOWrdfmI-YHGsPuJN2mFFvMTzKEx7RqYYZbl4g/exec", {
+      method: "POST",
+      body: JSON.stringify({ gewichtetesEinkommen }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    .then(response => response.text())
+    .then(result => console.log("Erfolgreich gesendet:", result))
+    .catch(error => console.error("Fehler beim Senden:", error));
+  }
+</script>
