@@ -15,17 +15,5 @@
     document.getElementById("ergebnis").textContent =
       "Dein gewichtetes Haushaltseinkommen beträgt: " +
       gewichtetesEinkommen.toLocaleString("de-DE") + " €";
-
-    // Senden an Google Apps Script Web-App
-    fetch("https://script.google.com/macros/s/AKfycbyS7-E003fefy7Umu2NbPYokj1PUKcsmOWrdfmI-YHGsPuJN2mFFvMTzKEx7RqYYZbl4g/exec", {
-      method: "POST",
-      body: JSON.stringify({ gewichtetesEinkommen }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-    .then(response => response.text())
-    .then(result => console.log("Erfolgreich gesendet:", result))
-    .catch(error => console.error("Fehler beim Senden:", error));
   }
 </script>
