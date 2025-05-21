@@ -1,19 +1,94 @@
-<script>
-  function berechne() {
-    const erw = parseInt(document.getElementById("erwachsene").value) || 0;
-    const kind = parseInt(document.getElementById("kinder").value) || 0;
-    const einkommen = parseFloat(document.getElementById("einkommen").value) || 0;
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gewichtetes Haushaltseinkommen</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+    label, input {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 1.1em;
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      font-size: 1.2em;
+      border-radius: 8px;
+    }
+    .q1 { background-color: #d4edda; }
+    .q2 { background-color: #ffffff; }
+    .q3 { background-color: #fff3cd; }
+    .q4 { background-color: #f8d7da; }
+  </style>
+</head>
+<body>
+  <h1>Gewichtetes Haushaltseinkommen</h1>
 
-    if (erw === 0) {
-      alert("Bitte mindestens eine erwachsene Person angeben.");
-      return;
+  <label for="adults">Anzahl der Erwachsenen (über 14 Jahren):</label>
+  <input type="number" id="adults" min="1" value="1">
+
+  <label for="children">Anzahl der Kinder (unter 14 Jahren):</label>
+  <input type="number" id="children" min="0" value="0">
+
+  <label for="income">Haushaltseinkommen (€):</label>
+  <input type="number" id="income" min="0" step="100" value="0">
+
+  <div id="output" class="result"></div>
+
+  <script>
+    const adultsInput = document.getElementById('adults');
+    const childrenInput = document.getElementById('children');
+    const incomeInput = document.getElementById('income');
+    const outputDiv = document.getElementById('output');
+
+    function calculate() {
+      const adults = parseInt(adultsInput.value) || 1;
+      const children = parseInt(childrenInput.value) || 0;
+      const income = parseFloat(incomeInput.value) || 0;
+
+      const weight = 1 + (adults - 1) * 0.5 + children * 0.3;
+      const weightedIncome = income * 1.8 / weight;
+
+      let quartileClass = '';
+      let quartileText = '';
+
+      if (weightedIncome <= 54000) {
+        quartileClass = 'q1';
+        quartileText = '1. Quartil';
+      } else if (weightedIncome <= 70000) {
+        quartileClass = 'q2';
+        quartileText = '2. Quartil';
+      } else if (weightedIncome <= 93000) {
+        quartileClass = 'q3';
+        quartileText = '3. Quartil';
+      } else {
+        quartileClass = 'q4';
+        quartileText = '4. Quartil';
+      }
+
+      outputDiv.className = `result ${quartileClass}`;
+      outputDiv.innerHTML = `
+        <strong>Gewichtetes Einkommen:</strong> €${weightedIncome.toFixed(2)}<br>
+        <strong>Quartil:</strong> ${quartileText}
+      `;
     }
 
-    const gewicht = 1 + (erw - 1) * 0.5 + kind * 0.3;
-    const gewichtetesEinkommen = Math.round((einkommen * 1.8) / gewicht);
+    adultsInput.addEventListener('input', calculate);
+    childrenInput.addEventListener('input', calculate);
+    incomeInput.addEventListener('input', calculate);
 
-    document.getElementById("ergebnis").textContent =
-      "Dein gewichtetes Haushaltseinkommen beträgt: " +
-      gewichtetesEinkommen.toLocaleString("de-DE") + " €";
-  }
-</script>
+    calculate();
+  </script>
+</body>
+</html>
