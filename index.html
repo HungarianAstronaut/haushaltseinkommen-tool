@@ -66,13 +66,13 @@
       let quartileText = '';
 
       if (weightedIncome <= 54000) {
-        quartileText = '1. Quartil';
+        quartileText = '1. Quartil (vergünstigtes Schulgeld)';
       } else if (weightedIncome <= 70000) {
-        quartileText = '2. Quartil';
+        quartileText = '2. Quartil (gleichbleibendes Schulgeld)';
       } else if (weightedIncome <= 93000) {
-        quartileText = '3. Quartil';
+        quartileText = '3. Quartil (um 5% erhöhtes Schulgeld)';
       } else {
-        quartileText = '4. Quartil';
+        quartileText = '4. Quartil (um 10% erhöhtes Schulgeld)';
       }
 
       outputDiv.innerHTML = `
