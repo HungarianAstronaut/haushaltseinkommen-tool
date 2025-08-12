@@ -33,10 +33,10 @@
 <body>
   <h1>Gewichtetes Haushaltseinkommen</h1>
 
-  <label for="adults">Anzahl der Erwachsenen (über 14 Jahren):</label>
+  <label for="adults">Anzahl der Erwachsenen (ab 14 Jahren):</label>
   <input type="number" id="adults" min="1">
 
-  <label for="children">Anzahl der Kinder (unter 14 Jahren):</label>
+  <label for="children">Anzahl der Kinder (bis 14 Jahren):</label>
   <input type="number" id="children" min="0">
 
   <label for="income">Netto Haushaltseinkommen (€):</label>
@@ -72,7 +72,7 @@
       } else if (weightedIncome <= 93000) {
         quartileText = '3. Quartil (429,5€ Schulgeld)';
       } else {
-        quartileText = '4. Quartil (449,9€ Schulgeld)';
+        quartileText = '4. Quartil (450€ Schulgeld)';
       }
 
       outputDiv.innerHTML = `
